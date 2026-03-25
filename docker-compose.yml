@@ -1,0 +1,16 @@
+# Researcher Kit web UI — run anywhere Docker runs (local, Oracle Cloud, etc.)
+#
+#   docker compose up --build
+#
+# Then open http://localhost:3000 — use "Set API Key" in the UI, or set env vars below.
+
+services:
+  web:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      RESEARCHER_KIT_ROOT: /app/researcher-kit
+      # Optional: server-side API keys so users need not paste keys in the browser
+      # ANTHROPIC_API_KEY: ""
+      # OPENAI_API_KEY: ""

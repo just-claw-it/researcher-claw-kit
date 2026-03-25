@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+set -e
+
+echo "[researcher-kit] Installing..."
+
+CLAUDE_DIR="$HOME/.claude"
+SKILLS_DIR="$CLAUDE_DIR/skills/researcher"
+
+mkdir -p "$SKILLS_DIR"
+cp -r .claude/skills/researcher/. "$SKILLS_DIR/"
+cp -r standards "$SKILLS_DIR/standards"
+
+echo "[researcher-kit] Skills installed to $SKILLS_DIR"
+echo ""
+echo "Add this section to your CLAUDE.md:"
+echo ""
+echo "## Researcher Kit"
+echo "Available skills: /research-intake, /lit-review, /draft-review"
+echo "Standards: ~/.claude/skills/researcher/standards/"
+echo "Never fabricate citations. If a paper cannot be found via search, say so."
+echo ""
+echo "[researcher-kit] Done."

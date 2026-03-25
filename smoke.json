@@ -1,0 +1,64 @@
+[
+  {
+    "skill": "research-intake",
+    "input": {
+      "message": "I want to study how developers use LLMs for code review in open-source projects."
+    },
+    "outputSchema": {
+      "type": "prose",
+      "validationStrategy": "contains",
+      "requiredPhrases": [],
+      "requiredBehaviors": [
+        "reflects_back_idea",
+        "requests_confirmation"
+      ],
+      "forbiddenBehaviors": [
+        "fabricates_citation"
+      ],
+      "validationNote": "The skill must reflect back the researcher's idea and ask for confirmation before proceeding. It should not jump straight to producing PROBLEM.md without the reflection-confirmation loop."
+    }
+  },
+  {
+    "skill": "lit-review",
+    "input": {
+      "message": "Run /lit-review. Research question: Does adopting TDD reduce post-release defect density in industrial Java projects? Contribution claim: First large-scale industrial study comparing TDD vs. test-last with defect-density as the primary outcome."
+    },
+    "outputSchema": {
+      "type": "prose",
+      "validationStrategy": "contains",
+      "requiredPhrases": [
+        "search"
+      ],
+      "requiredBehaviors": [
+        "presents_search_strategy",
+        "requests_confirmation"
+      ],
+      "forbiddenBehaviors": [
+        "fabricates_citation"
+      ],
+      "validationNote": "The skill must present a search strategy with terms and venues, then ask the researcher to confirm before executing searches. It must not fabricate citations."
+    }
+  },
+  {
+    "skill": "draft-review",
+    "input": {
+      "message": "Review this abstract: 'We conduct a controlled experiment with 30 students to evaluate whether test-driven development improves code quality compared to test-last development. We measure defect density and test coverage across two groups.'"
+    },
+    "outputSchema": {
+      "type": "prose",
+      "validationStrategy": "contains",
+      "requiredPhrases": [
+        "experiment"
+      ],
+      "requiredBehaviors": [
+        "presents_inferred_method",
+        "requests_confirmation"
+      ],
+      "forbiddenBehaviors": [
+        "proceeds_to_evaluation_without_confirmation",
+        "fabricates_citation"
+      ],
+      "validationNote": "This skill is conversational. The smoke test validates behavioral markers in prose output, not JSON structure. A passing response must name the inferred method (Experiment) and explicitly ask the researcher to confirm before proceeding to evaluation."
+    }
+  }
+]

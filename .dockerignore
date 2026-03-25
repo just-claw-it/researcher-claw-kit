@@ -1,0 +1,9 @@
+# Build context is the repo root; keep the image build fast and deterministic
+.git
+.github
+ci
+node_modules
+web/node_modules
+web/.next
+**/.DS_Store
+*.log

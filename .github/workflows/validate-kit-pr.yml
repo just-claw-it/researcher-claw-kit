@@ -1,0 +1,73 @@
+name: Validate Kit PR
+
+on:
+  pull_request:
+
+jobs:
+  validate-kit:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: ci/package-lock.json
+
+      - name: Install CI validator dependencies
+        run: cd ci && npm ci
+
+      - name: Run kit validation
+        run: |
+          cd ci
+          npx tsx src/validate-kit.ts ..
+
+      - name: Run unit tests
+        run: cd ci && npm test
+
+  validate-web:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install web app dependencies
+        run: cd web && npm ci
+
+      - name: Lint web app
+        run: cd web && npm run lint
+
+      - name: Build web app
+        run: cd web && npm run build
+
+  validate-docker:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t researcher-kit .
+
+  all-checks-pass:
+    needs: [validate-kit, validate-web, validate-docker]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Check all jobs passed
+        run: |
+          if [ "${{ needs.validate-kit.result }}" != "success" ] || [ "${{ needs.validate-web.result }}" != "success" ] || [ "${{ needs.validate-docker.result }}" != "success" ]; then
+            echo "One or more checks failed."
+            exit 1
+          fi
+          echo "All checks passed."

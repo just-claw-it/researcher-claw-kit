@@ -1,0 +1,97 @@
+name: Nightly Kit Check
+
+on:
+  schedule:
+    - cron: "0 2 * * *"
+  workflow_dispatch:
+
+# Default GITHUB_TOKEN is often read-only for issues; listing/creating issues needs this.
+# Repo Settings → Actions → General → Workflow permissions must allow these (or use read/write).
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  nightly-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: ci/package-lock.json
+
+      - name: Install CI validator
+        run: cd ci && npm ci
+
+      - name: Run kit validation
+        id: validate
+        continue-on-error: true
+        run: |
+          cd ci
+          npx tsx src/validate-kit.ts ..
+
+      - name: Run unit tests
+        id: test
+        continue-on-error: true
+        run: cd ci && npm test
+
+      - name: Set up Node.js for web
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install web dependencies
+        id: web_install
+        continue-on-error: true
+        run: cd web && npm ci
+
+      - name: Lint and build web app
+        id: web_build
+        continue-on-error: true
+        run: |
+          cd web
+          npm run lint
+          npm run build
+
+      - name: Handle failure — open issue
+        if: steps.validate.outcome == 'failure' || steps.test.outcome == 'failure' || steps.web_install.outcome == 'failure' || steps.web_build.outcome == 'failure'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const config = JSON.parse(fs.readFileSync('kit.json', 'utf-8'));
+            const maintainer = config.maintainer;
+
+            const existing = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: ['nightly-failure'],
+              state: 'open',
+            });
+
+            const alreadyOpen = existing.data.some(
+              (issue) => issue.title.includes('[nightly]')
+            );
+
+            if (!alreadyOpen) {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: '[nightly] CI validation, tests, or web build failing',
+                body: [
+                  `@${maintainer} — the nightly check failed.`,
+                  '',
+                  `**Run:** ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+                  '',
+                  'Please investigate and fix the issue.',
+                ].join('\n'),
+                labels: ['nightly-failure'],
+              });
+            }

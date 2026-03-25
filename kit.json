@@ -1,0 +1,14 @@
+{
+  "name": "researcher",
+  "version": "0.1.0",
+  "maintainer": "just-claw-it",
+  "description": "Research workflow kit: problem framing, literature review, and empirical standards-based peer review for software engineering researchers.",
+  "skills": [
+    "research-intake",
+    "lit-review",
+    "draft-review"
+  ],
+  "requiredTools": [
+    "web_search"
+  ]
+}
